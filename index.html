@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Crescita">
+<meta name="theme-color" content="#FAF7F2">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Crescita 🌱</title>
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --card: #FFFFFF;
+    --text: #2D2A24;
+    --text-soft: #7A7068;
+    --border: #E8E2D9;
+    --reggio: #4A7C9A;
+    --reggio-light: #EBF3F8;
+    --montessori: #C97A4E;
+    --montessori-light: #FBF0E9;
+    --pikler: #5F9E70;
+    --pikler-light: #EBF5EE;
+    --misto: #8B6BB5;
+    --misto-light: #F2EDF9;
+    --tab-active: #2D2A24;
+    --shadow: 0 2px 12px rgba(45,42,36,0.08);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 90px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--text);
+    color: #FAF7F2;
+    padding: 28px 20px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .header-date { font-size: 12px; color: #B8B0A4; }
+  .age-badge {
+    background: rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .header-subtitle { font-size: 13px; color: #A09890; margin-top: 2px; }
+
+  /* TABS */
+  .tabs {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    position: sticky;
+    top: 84px;
+    z-index: 99;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 1;
+    min-width: 70px;
+    padding: 13px 8px 11px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-soft);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.18s;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+  }
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--text);
+  }
+  .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+
+  /* CONTENT */
+  .content { padding: 16px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 12px;
+  }
+  .card h2 { font-size: 19px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
+  .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .card p { font-size: 14px; line-height: 1.6; color: var(--text-soft); }
+
+  /* METHOD BADGE */
+  .method-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 12px;
+  }
+  .badge-reggio    { background: var(--reggio-light);    color: var(--reggio); }
+  .badge-montessori{ background: var(--montessori-light); color: var(--montessori); }
+  .badge-pikler    { background: var(--pikler-light);    color: var(--pikler); }
+  .badge-misto     { background: var(--misto-light);     color: var(--misto); }
+
+  /* ACTIVITY CARD */
+  .activity-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .meta-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--text-soft);
+    font-weight: 500;
+  }
+  .activity-steps { list-style: none; margin-top: 12px; }
+  .activity-steps li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-steps li:last-child { border-bottom: none; }
+  .step-num {
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .materials-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .material-tag {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .why-box {
+    background: var(--bg);
+    border-left: 3px solid var(--border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-soft);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    width: 100%;
+    margin-top: 12px;
+  }
+  .btn:active { opacity: 0.7; }
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  /* MILESTONES */
+  .milestone-phase {
+    background: var(--text);
+    color: var(--bg);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .milestone-phase h2 { font-size: 16px; font-weight: 700; }
+  .milestone-phase p { font-size: 13px; color: #B8B0A4; margin-top: 4px; line-height: 1.5; }
+
+  .domain-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .domain-icon { font-size: 18px; }
+  .milestone-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .milestone-item:last-child { border-bottom: none; }
+  .milestone-item input[type=checkbox] {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--text);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .milestone-item label {
+    cursor: pointer;
+    color: var(--text);
+    transition: color 0.15s;
+  }
+  .milestone-item.done label { color: var(--text-soft); text-decoration: line-through; }
+  .milestone-note {
+    font-size: 11px;
+    color: var(--text-soft);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* ENVIRONMENT */
+  .env-section { margin-bottom: 6px; }
+  .env-method-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+    cursor: pointer;
+    justify-content: space-between;
+  }
+  .env-method-header .left { display: flex; align-items: center; gap: 8px; }
+  .env-item {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-soft);
+  }
+  .env-item:last-child { border-bottom: none; }
+  .env-item::before {
+    content: "→";
+    color: var(--border);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .env-body { display: block; }
+  .env-body.collapsed { display: none; }
+
+  /* DIARY */
+  .diary-form { margin-bottom: 14px; }
+  .diary-textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--card);
+    resize: none;
+    min-height: 90px;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .diary-textarea:focus { border-color: var(--text); }
+  .diary-entry {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .diary-entry-date {
+    font-size: 11px;
+    color: var(--text-soft);
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .diary-entry-text {
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .diary-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 2px;
+  }
+  .diary-delete, .diary-edit {
+    background: none;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    color: var(--border);
+  }
+  .diary-edit:hover  { background: var(--bg); color: var(--text); }
+  .diary-delete:hover { color: #C0392B; }
+  .diary-entry.editing { background: var(--bg); }
+  .edit-mood-row { display: flex; gap: 8px; margin: 6px 0 10px; }
+  .edit-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .edit-actions .btn { margin: 0; flex: 1; }
+  .edit-photo-area { margin: 8px 0; }
+  .edit-photo-thumb {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  .edit-photo-thumb img {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+  }
+  .edit-photo-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .edit-photo-actions button {
+    flex: 1;
+    padding: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text-soft);
+  }
+  .diary-empty {
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 14px;
+    padding: 30px 0;
+  }
+  .photo-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-soft);
+    cursor: pointer;
+    width: 100%;
+    margin: 8px 0;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .photo-btn:hover { border-color: var(--text); color: var(--text); }
+  .photo-preview {
+    position: relative;
+    display: inline-block;
+    margin: 8px 0;
+  }
+  .photo-preview img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    display: block;
+  }
+  .photo-remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .diary-entry-photo {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    display: block;
+    cursor: pointer;
+  }
+  /* lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; }
+  .lightbox-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    color: #fff; font-size: 28px;
+    background: none; border: none; cursor: pointer;
+  }
+  .diary-filter {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-soft);
+    transition: all 0.15s;
+  }
+  .filter-chip.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .mood-row {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .mood-btn {
+    font-size: 20px;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .mood-btn.selected { border-color: var(--text); background: var(--card); }
+  .mood-label { font-size: 11px; color: var(--text-soft); margin-bottom: 4px; }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    background: var(--border);
+    border-radius: 10px;
+    height: 6px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--text);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-top: 5px;
+  }
+
+  /* HEALTH / CRESCITA */
+  .health-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .health-input-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-soft);
+    gap: 4px;
+  }
+  .health-input-grid input {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    outline: none;
+  }
+  .health-input-grid input:focus { border-color: var(--text); }
+  .health-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 4px 0 10px;
+  }
+  .metric {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .metric .mval { font-size: 20px; font-weight: 700; color: var(--text); }
+  .metric .mlabel { font-size: 11px; color: var(--text-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .metric .mperc { font-size: 11px; color: var(--pikler); font-weight: 600; margin-top: 2px; }
+  .health-entry-photo {
+    width: 100%; max-height: 200px; object-fit: cover;
+    border-radius: var(--radius-sm); margin-top: 10px; cursor: pointer; display: block;
+  }
+  .health-date {
+    font-size: 11px; color: var(--text-soft); font-weight: 600;
+    letter-spacing: 0.3px; margin-bottom: 8px;
+  }
+
+  /* NANNA / RUMORI */
+  .noise-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .noise-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px 6px; cursor: pointer; transition: all 0.15s; color: var(--text);
+  }
+  .noise-btn .ni { font-size: 22px; }
+  .noise-btn .nt { font-size: 13px; font-weight: 700; }
+  .noise-btn .nd { font-size: 10px; color: var(--text-soft); text-align: center; line-height: 1.2; }
+  .noise-btn.playing { border-color: var(--text); background: var(--card); box-shadow: var(--shadow); }
+  .noise-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+  .noise-lbl { font-size: 12px; font-weight: 600; color: var(--text-soft); min-width: 110px; }
+  .noise-row input[type=range] { flex: 1; accent-color: var(--text); }
+  .noise-timer { display: flex; gap: 6px; flex-wrap: wrap; }
+  .noise-timer button {
+    border: 1px solid var(--border); background: var(--card); border-radius: 20px;
+    padding: 5px 11px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-soft);
+  }
+  .noise-timer button.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .noise-status { text-align: center; font-size: 13px; font-weight: 600; color: var(--text-soft); margin-top: 6px; }
+
+  /* SCROLL REVEAL */
+  .card { animation: fadeUp 0.2s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>Riky 🌱</h1>
+      <div class="header-subtitle" id="ageText">Calcolo età...</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="age-badge" id="ageBadge">...</div>
+      <button onclick="showSetup(false)" title="Impostazioni" style="background:none;border:none;font-size:20px;line-height:1;cursor:pointer;opacity:.55;padding:4px">⚙️</button>
+    </div>
+  </div>
+  <div class="header-date" id="headerDate"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('oggi')">
+    <span class="tab-icon">☀️</span>Oggi
+  </div>
+  <div class="tab" onclick="switchTab('milestone')">
+    <span class="tab-icon">🌿</span>Sviluppo
+  </div>
+  <div class="tab" onclick="switchTab('ambiente')">
+    <span class="tab-icon">🏡</span>Ambiente
+  </div>
+  <div class="tab" onclick="switchTab('diario')">
+    <span class="tab-icon">📓</span>Diario
+  </div>
+  <div class="tab" onclick="switchTab('crescita')">
+    <span class="tab-icon">📈</span>Crescita
+  </div>
+  <div class="tab" onclick="switchTab('nanna')">
+    <span class="tab-icon">🌙</span>Nanna
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ==================== OGGI ==================== -->
+  <div class="section active" id="sec-oggi">
+
+    <div class="card" id="activity-card">
+      <div class="card-title">Attività del giorno</div>
+      <div id="activity-content">Caricamento...</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Legenda metodi</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+          <span class="method-badge badge-reggio" style="margin:0">Reggio</span>
+          <span style="color:var(--text-soft)">Osservazione, relazione, i cento linguaggi</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+          <span class="method-badge badge-montessori" style="margin:0">Montessori</span>
+          <span style="color:var(--text-soft)">Autonomia, ordine, ambiente preparato</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+          <span class="method-badge badge-pikler" style="margin:0">Pikler</span>
+          <span style="color:var(--text-soft)">Movimento libero, relazione di cura</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+          <span class="method-badge badge-misto" style="margin:0">Integrato</span>
+          <span style="color:var(--text-soft)">Combina principi di tutti e tre</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== MILESTONE ==================== -->
+  <div class="section" id="sec-milestone">
+    <div class="milestone-phase">
+      <h2 id="phase-title">Fase dell'Esploratore</h2>
+      <p id="phase-desc">Caricamento...</p>
+    </div>
+    <div id="milestone-content">Caricamento...</div>
+  </div>
+
+  <!-- ==================== AMBIENTE ==================== -->
+  <div class="section" id="sec-ambiente">
+    <div class="card">
+      <div class="card-title">Setup per questa fase</div>
+      <p style="font-size:13px;color:var(--text-soft);margin-bottom:0">Consigli pratici per gli spazi di casa calibrati sull'età di Riky.</p>
+    </div>
+    <div id="ambiente-content">Caricamento...</div>
+  </div>
+
+  <!-- ==================== DIARIO ==================== -->
+  <div class="section" id="sec-diario">
+    <div class="card diary-form">
+      <div class="card-title">Nuova osservazione</div>
+      <div class="mood-label">Come stava oggi?</div>
+      <div class="mood-row" id="moodRow">
+        <button class="mood-btn" data-mood="😊" onclick="selectMood(this)" title="Sereno">😊</button>
+        <button class="mood-btn" data-mood="😄" onclick="selectMood(this)" title="Molto felice">😄</button>
+        <button class="mood-btn" data-mood="😴" onclick="selectMood(this)" title="Stanco">😴</button>
+        <button class="mood-btn" data-mood="😠" onclick="selectMood(this)" title="Irritabile">😠</button>
+        <button class="mood-btn" data-mood="🤒" onclick="selectMood(this)" title="Non stava bene">🤒</button>
+      </div>
+      <textarea class="diary-textarea" id="diaryInput" placeholder="Scrivi cosa hai osservato oggi — una parola nuova, un gioco che ha inventato, come ha reagito a qualcosa..."></textarea>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+      <div id="photoPreviewArea"></div>
+      <button class="photo-btn" onclick="document.getElementById('photoInput').click()">
+        📷 Aggiungi foto
+      </button>
+      <button class="btn btn-primary" onclick="saveDiaryEntry()">Salva osservazione</button>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <button class="lightbox-close">×</button>
+      <img id="lightboxImg" src="" alt="">
+    </div>
+
+    <div class="diary-filter">
+      <div class="filter-chip active" onclick="filterDiary('all', this)">Tutte</div>
+      <div class="filter-chip" onclick="filterDiary('😊', this)">😊</div>
+      <div class="filter-chip" onclick="filterDiary('😄', this)">😄</div>
+      <div class="filter-chip" onclick="filterDiary('😴', this)">😴</div>
+      <div class="filter-chip" onclick="filterDiary('😠', this)">😠</div>
+      <div class="filter-chip" onclick="filterDiary('🤒', this)">🤒</div>
+    </div>
+
+    <div id="diary-entries"></div>
+  </div>
+
+  <!-- ==================== CRESCITA & SALUTE ==================== -->
+  <div class="section" id="sec-crescita">
+    <div class="card health-form">
+      <div class="card-title">Nuova rilevazione / visita</div>
+      <div class="health-input-grid">
+        <label>Data<input type="date" id="hDate"></label>
+        <label>Tipo / occasione<input type="text" id="hType" placeholder="es. Bilancio 18 mesi"></label>
+        <label>Peso (kg)<input type="number" step="0.01" inputmode="decimal" id="hWeight" placeholder="10.5"></label>
+        <label>Altezza (cm)<input type="number" step="0.1" inputmode="decimal" id="hHeight" placeholder="80.5"></label>
+        <label>Circonf. cranica (cm)<input type="number" step="0.1" inputmode="decimal" id="hHead" placeholder="48"></label>
+        <label>Percentili<input type="text" id="hPerc" placeholder="es. Peso 10–25° · Alt 25–50°"></label>
+      </div>
+      <textarea class="diary-textarea" id="hNotes" placeholder="Note / esito della visita..." style="min-height:70px;margin-top:10px"></textarea>
+      <button class="btn btn-primary" onclick="saveHealthEntry()">Salva rilevazione</button>
+    </div>
+    <div id="health-content">Caricamento...</div>
+  </div>
+
+  <!-- ==================== NANNA / RUMORI BIANCHI ==================== -->
+  <div class="section" id="sec-nanna">
+    <div class="card">
+      <div class="card-title">Rumori bianchi per la nanna</div>
+      <p style="margin-bottom:14px">Un sottofondo costante aiuta Riky ad addormentarsi ricreando l'effetto del motore dell'auto. Tocca un suono per avviarlo (continua anche se cambi scheda).</p>
+      <div class="noise-grid">
+        <button class="noise-btn" data-type="brown" onclick="toggleNoise('brown')">
+          <span class="ni">🚗</span><span class="nt">Marrone</span><span class="nd">grave, tipo motore</span>
+        </button>
+        <button class="noise-btn" data-type="forest" onclick="toggleNoise('forest')">
+          <span class="ni">🌲</span><span class="nt">Foresta</span><span class="nd">vento e uccellini</span>
+        </button>
+        <button class="noise-btn" data-type="rain" onclick="toggleNoise('rain')">
+          <span class="ni">🌧️</span><span class="nt">Pioggia</span><span class="nd">su foglie</span>
+        </button>
+        <button class="noise-btn" data-type="waves" onclick="toggleNoise('waves')">
+          <span class="ni">🌊</span><span class="nt">Onde</span><span class="nd">mare calmo</span>
+        </button>
+        <button class="noise-btn" data-type="pink" onclick="toggleNoise('pink')">
+          <span class="ni">🌫️</span><span class="nt">Rosa</span><span class="nd">fruscio morbido</span>
+        </button>
+        <button class="noise-btn" data-type="white" onclick="toggleNoise('white')">
+          <span class="ni">📻</span><span class="nt">Bianco</span><span class="nd">fruscio neutro</span>
+        </button>
+      </div>
+      <div class="noise-row">
+        <span class="noise-lbl">🔉 Volume</span>
+        <input type="range" min="0" max="1" step="0.01" value="0.5" id="noiseVol" oninput="setNoiseVolume(this.value)">
+      </div>
+      <div class="noise-row">
+        <span class="noise-lbl">⏱️ Spegnimento</span>
+        <div class="noise-timer" id="noiseTimer">
+          <button class="active" onclick="setNoiseTimer(0,this)">Off</button>
+          <button onclick="setNoiseTimer(15,this)">15m</button>
+          <button onclick="setNoiseTimer(30,this)">30m</button>
+          <button onclick="setNoiseTimer(45,this)">45m</button>
+          <button onclick="setNoiseTimer(60,this)">60m</button>
+        </div>
+      </div>
+      <div class="noise-status" id="noiseStatus">In pausa</div>
+      <div class="why-box" style="font-style:normal;margin-top:14px">🔇 Attivato uno sblocco audio per farlo suonare <b>anche col silenzioso inserito</b> (best-effort su iPhone). 📱 Tieni comunque l'app aperta e lo schermo acceso vicino al lettino: l'audio si ferma se blocchi il telefono. Per il pisolino è perfetto.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   MODALITÀ AUTONOMA (nessun server) — i dati restano nel telefono
+   Backend simulato: localStorage (testi) + IndexedDB (foto)
+   ============================================================ */
+// --- Dati del bambino (modificabili dalle Impostazioni ⚙️) ---
+const BB_DEFAULTS = { name: 'Matteo', birthdate: '2025-01-04' };
+function loadConfig() {
+  try { return Object.assign({}, BB_DEFAULTS, JSON.parse(localStorage.getItem('bb_config') || '{}')); }
+  catch (e) { return Object.assign({}, BB_DEFAULTS); }
+}
+let CONFIG = loadConfig();
+
+// --- Helper localStorage (JSON) ---
+function lsGet(key, def) { try { const v = localStorage.getItem(key); return v == null ? def : JSON.parse(v); } catch(e){ return def; } }
+function lsSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+// --- IndexedDB per le foto (filename -> dataURL) ---
+let _idb = null;
+function idb() {
+  if (_idb) return _idb;
+  _idb = new Promise((resolve, reject) => {
+    const r = indexedDB.open('bb_photos', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('photos');
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+  return _idb;
+}
+async function idbPut(key, val) {
+  const db = await idb();
+  return new Promise((res, rej) => { const tx = db.transaction('photos','readwrite'); tx.objectStore('photos').put(val, key); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+}
+async function idbGet(key) {
+  const db = await idb();
+  return new Promise((res, rej) => { const tx = db.transaction('photos','readonly'); const g = tx.objectStore('photos').get(key); g.onsuccess = () => res(g.result || null); g.onerror = () => rej(g.error); });
+}
+async function idbDel(key) {
+  const db = await idb();
+  return new Promise((res, rej) => { const tx = db.transaction('photos','readwrite'); tx.objectStore('photos').delete(key); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+}
+
+// --- Backend simulato: intercetta le chiamate /api/* ---
+const _realFetch = window.fetch ? window.fetch.bind(window) : null;
+function apiResponse(data, status) {
+  return Promise.resolve({ ok: status ? status < 400 : true, status: status || 200, json: async () => data, text: async () => JSON.stringify(data) });
+}
+window.fetch = function(input, opts) {
+  const url = (typeof input === 'string') ? input : (input && input.url) || '';
+  if (url.indexOf('/api/') === -1) { return _realFetch ? _realFetch(input, opts) : Promise.reject(new Error('fetch non disponibile')); }
+  opts = opts || {};
+  const method = (opts.method || 'GET').toUpperCase();
+  let body = null;
+  if (opts.body) { try { body = JSON.parse(opts.body); } catch(e){ body = null; } }
+  return handleApi(url.split('?')[0], method, body);
+};
+async function handleApi(path, method, body) {
+  // ---- DIARIO ----
+  if (path === '/api/diary' && method === 'GET')  return apiResponse(lsGet('bb_diary', []));
+  if (path === '/api/diary' && method === 'POST') { const l = lsGet('bb_diary', []); l.unshift(body); lsSet('bb_diary', l); return apiResponse(body, 201); }
+  if (path.indexOf('/api/diary/') === 0 && method === 'PUT') {
+    const id = Number(path.split('/').pop());
+    const l = lsGet('bb_diary', []); const e = l.find(x => x.id === id);
+    if (e) {
+      if (body.removePhoto && e.photo) { await idbDel(e.photo); e.photo = null; }
+      else if (body.newPhotoDataUrl) { if (e.photo) await idbDel(e.photo); const fn = 'photo_' + id + '_' + Date.now() + '.jpg'; await idbPut(fn, body.newPhotoDataUrl); e.photo = fn; }
+      if ('text' in body) e.text = body.text;
+      if ('mood' in body) e.mood = body.mood;
+    }
+    lsSet('bb_diary', l); return apiResponse({ ok: true });
+  }
+  if (path.indexOf('/api/diary/') === 0 && method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    let l = lsGet('bb_diary', []); const e = l.find(x => x.id === id);
+    if (e && e.photo) await idbDel(e.photo);
+    l = l.filter(x => x.id !== id); lsSet('bb_diary', l); return apiResponse({ ok: true });
+  }
+  // ---- MILESTONE ----
+  if (path === '/api/milestones' && method === 'GET')  return apiResponse(lsGet('bb_milestones', {}));
+  if (path === '/api/milestones' && method === 'POST') { lsSet('bb_milestones', body || {}); return apiResponse({ ok: true }); }
+  // ---- SALUTE ----
+  if (path === '/api/health' && method === 'GET')  return apiResponse(lsGet('bb_health', []));
+  if (path === '/api/health' && method === 'POST') { const l = lsGet('bb_health', []); l.unshift(body); lsSet('bb_health', l); return apiResponse(body, 201); }
+  // ---- FOTO ----
+  if (path === '/api/photo' && method === 'POST') { const fn = 'photo_' + body.id + '.jpg'; await idbPut(fn, body.dataUrl); return apiResponse({ filename: fn }, 201); }
+  return apiResponse({ error: 'not found' }, 404);
+}
+
+// --- Foto: placeholder trasparente + risoluzione da IndexedDB ---
+const PH = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+async function resolvePhotoImg(img) {
+  if (img.dataset.phResolved) return;
+  img.dataset.phResolved = '1';
+  const url = await idbGet(img.dataset.ph);
+  if (url) img.src = url;
+}
+// --- Personalizzazione: sostituisce "Riky" col nome scelto nei testi ---
+function replaceNameIn(root) {
+  if (!CONFIG.name || CONFIG.name === 'Riky') return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      const t = n.parentNode && n.parentNode.nodeName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEXTAREA' || t === 'INPUT') return NodeFilter.FILTER_REJECT;
+      return n.nodeValue.indexOf('Riky') !== -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n => { n.nodeValue = n.nodeValue.split('Riky').join(CONFIG.name); });
+}
+// --- Osserva il DOM: risolve le foto e personalizza i testi via via aggiunti ---
+function startDomObserver() {
+  new MutationObserver(muts => {
+    for (const m of muts) for (const node of m.addedNodes) {
+      if (node.nodeType !== 1) continue;
+      if (node.matches && node.matches('img[data-ph]')) resolvePhotoImg(node);
+      if (node.querySelectorAll) node.querySelectorAll('img[data-ph]').forEach(resolvePhotoImg);
+      replaceNameIn(node);
+    }
+  }).observe(document.body, { childList: true, subtree: true });
+}
+
+// --- Schermata iniziale: nome + data di nascita ---
+function showSetup(first) {
+  const old = document.getElementById('bbSetup'); if (old) old.remove();
+  const ov = document.createElement('div');
+  ov.id = 'bbSetup';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(45,42,36,.55);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:24px;box-shadow:0 8px 40px rgba(0,0,0,.2)">' +
+      '<h2 style="margin-bottom:6px;font-size:20px">' + (first ? 'Benvenuti 🌱' : 'Impostazioni') + '</h2>' +
+      '<p style="color:#7A7068;font-size:14px;margin-bottom:18px">' +
+        (first ? 'Questa dashboard cresce insieme al vostro bambino: attività, traguardi e ambiente si adattano alla sua età. Confermate il nome e la data di nascita per iniziare.' : 'Modifica il nome e la data di nascita del bambino.') +
+      '</p>' +
+      '<label style="font-size:12px;font-weight:600;color:#7A7068">Nome del bambino</label>' +
+      '<input id="bbName" type="text" value="' + (CONFIG.name || '').replace(/"/g,'&quot;') + '" style="width:100%;padding:11px;margin:6px 0 16px;border:1px solid #E8E2D9;border-radius:10px;font-size:16px">' +
+      '<label style="font-size:12px;font-weight:600;color:#7A7068">Data di nascita</label>' +
+      '<input id="bbDate" type="date" value="' + (CONFIG.birthdate || '') + '" style="width:100%;padding:11px;margin:6px 0 20px;border:1px solid #E8E2D9;border-radius:10px;font-size:16px">' +
+      '<button onclick="saveSetup()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#2D2A24;color:#fff;font-size:15px;font-weight:600;cursor:pointer">' + (first ? 'Inizia' : 'Salva') + '</button>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+function saveSetup() {
+  const name = (document.getElementById('bbName').value || '').trim() || 'il bambino';
+  const birthdate = document.getElementById('bbDate').value || BB_DEFAULTS.birthdate;
+  lsSet('bb_config', { name: name, birthdate: birthdate });
+  location.reload();
+}
+function maybeShowSetup() { if (!localStorage.getItem('bb_config')) showSetup(true); }
+
+// ===================== CONFIG =====================
+const RIKY_BIRTHDATE = new Date(CONFIG.birthdate);
+
+// ===================== AGE UTILS =====================
+function getAgeDetails(birthdate) {
+  const now = new Date();
+  const diffMs = now - birthdate;
+  const totalDays = Math.floor(diffMs / 86400000);
+  const years = now.getFullYear() - birthdate.getFullYear();
+  const months = now.getMonth() - birthdate.getMonth() + years * 12;
+  const days = now.getDate() - birthdate.getDate();
+  const totalMonths = days < 0 ? months - 1 : months;
+  const remDays = days < 0 ? now.getDate() + (new Date(now.getFullYear(), now.getMonth(), 0).getDate() - birthdate.getDate()) : days;
+  return { totalMonths, remDays, totalDays };
+}
+
+// ===================== ACTIVITIES DATABASE =====================
+const ACTIVITIES = [
+  {
+    id: 1, title: "Cestino dei Tesori", method: "reggio",
+    duration: "15–20 min", ageMin: 8, ageMax: 24,
+    materials: ["cestino di vimini", "oggetti in legno", "oggetti in metallo", "stoffe", "carta"],
+    description: "Riempi un cestino con 10–15 oggetti di materiali diversi. Siediti vicino a Riky e lascialo esplorare in completa libertà. Non guidare, non nominare — osserva.",
+    steps: [
+      "Prepara il cestino con oggetti di casa: un cucchiaio di legno, un tappo di metallo, una spugna, un pezzo di velluto, una pallina, una spazzola.",
+      "Mettilo a terra davanti a Riky e siediti a circa un metro di distanza.",
+      "Lascialo esplorare senza interrompere. Se nomina qualcosa con gesti o suoni, rispondi con calma.",
+      "Osserva cosa cattura la sua attenzione più a lungo — è informazione preziosa."
+    ],
+    why: "Il cestino dei tesori attiva tutti i sensi e rispetta il ritmo del bambino. L'adulto osserva — non dirige. È il cuore del Reggio Approach per i più piccoli."
+  },
+  {
+    id: 2, title: "Travaso con cucchiaio", method: "montessori",
+    duration: "10–15 min", ageMin: 12, ageMax: 30,
+    materials: ["2 ciotole", "cucchiaio grande", "pasta secca o ceci"],
+    description: "Disponi due ciotole affiancate su un vassoio. Una piena di pasta secca o ceci, l'altra vuota. Mostra lentamente il gesto del travaso, poi cedi a Riky.",
+    steps: [
+      "Prepara il vassoio con le due ciotole e il cucchiaio. Versaci dentro pasta secca.",
+      "Siediti accanto a Riky, mostra il gesto con calma: prendo, porto, verso.",
+      "Cedi il cucchiaio. Non correggere se versa sul vassoio — fa parte dell'esplorazione.",
+      "Quando finisce, ripristina insieme: lo coinvolgi nel raccogliere i pezzi caduti."
+    ],
+    why: "Il travaso sviluppa coordinazione occhio-mano, concentrazione e senso di completamento. L'ordine del vassoio crea un confine rassicurante — principio Montessori del 'lavoro'."
+  },
+  {
+    id: 3, title: "Movimento libero sui cuscini", method: "pikler",
+    duration: "20–30 min", ageMin: 6, ageMax: 24,
+    materials: ["cuscini grandi", "coperta arrotolata", "tappeto antiscivolo"],
+    description: "Crea un piccolo percorso motorio con cuscini impilati, una coperta arrotolata come rotolo, un piano inclinato con un cuscino. Lascia che Riky lo esplori senza guida.",
+    steps: [
+      "Disponi i cuscini in modo che creino piccole variazioni di altezza (5–15 cm max).",
+      "Siediti vicino ma fuori dal percorso. Sorridi e stai presente — non indicare cosa fare.",
+      "Se Riky fatica in un punto, aspetta. Il suo corpo sa cosa fare — fidati.",
+      "Osserva quali sfide sceglie spontaneamente e quali evita."
+    ],
+    why: "Pikler insegna che il bambino sviluppa le competenze motorie nel suo tempo, senza essere aiutato o anticipato. L'adulto è base sicura, non istruttore."
+  },
+  {
+    id: 4, title: "Pittura con le mani", method: "reggio",
+    duration: "20 min", ageMin: 12, ageMax: 36,
+    materials: ["tempere lavabili non tossiche", "carta da pacco grande", "vassoio", "grembiulino"],
+    description: "Stendi un foglio grande sul pavimento. Metti due o tre colori in piccoli piattini. Lascia che Riky si sporchi e esplori senza aspettative sul risultato.",
+    steps: [
+      "Proteggi il pavimento con carta o telo. Stendi il foglio grande.",
+      "Versa colori ben distanziati. Togli le scarpe a Riky — può dipingere anche coi piedi.",
+      "Non mostrare 'come si fa'. Se guarda, sorridi e aspetta. Sarà lui a iniziare.",
+      "Commenta ciò che vedi senza giudicare: 'Hai messo tanto rosso qui.'"
+    ],
+    why: "Il processo conta, non il prodotto. L'espressione pittorica è uno dei cento linguaggi di Malaguzzi — va onorata senza correzione."
+  },
+  {
+    id: 5, title: "Aprire e chiudere contenitori", method: "montessori",
+    duration: "15 min", ageMin: 12, ageMax: 30,
+    materials: ["contenitori con tappi diversi", "barattoli con coperchi a vite", "scatole con chiusure"],
+    description: "Raccogli contenitori con aperture diverse: un tappo a pressione, una vite, uno scatto, un cassettino. Disponili su un vassoio e lascia che Riky li esplori.",
+    steps: [
+      "Seleziona 4–5 contenitori di dimensioni e meccanismi diversi.",
+      "Metti dentro uno di essi qualcosa di piccolo (un sassolino, una pallina) — crea curiosità.",
+      "Mostra lentamente come aprire uno solo, poi lascia fare a lui.",
+      "Non intervenire per facilitare — aspetta che trovi la soluzione da solo."
+    ],
+    why: "Aprire e chiudere allena la motricità fine, la persistenza e la risoluzione di problemi. La frustrazione gestita è apprendimento."
+  },
+  {
+    id: 6, title: "Passeggita osservativa in natura", method: "misto",
+    duration: "30–45 min", ageMin: 12, ageMax: 48,
+    materials: ["sacchettino piccolo", "curiosità"],
+    description: "Una passeggiata senza meta fissa. Riky sceglie il ritmo. Puoi portare un sacchettino per raccogliere foglie, sassi, tutto ciò che cattura la sua attenzione.",
+    steps: [
+      "Esci senza fretta e senza un percorso definito. Segui dove guarda e dove va.",
+      "Quando si ferma su qualcosa, fermati anche tu. Dai tempo.",
+      "Nomina ciò che osserva: 'È una foglia secca. Ha i bordi colorati.'",
+      "Raccogli insieme due o tre cose — a casa le esplorerete di nuovo."
+    ],
+    why: "La natura è il contesto più ricco di stimoli autentici. Reggio, Montessori e Pikler concordano: l'outdoor non è pausa — è apprendimento primario."
+  },
+  {
+    id: 7, title: "Gioco con l'acqua", method: "reggio",
+    duration: "20 min", ageMin: 10, ageMax: 36,
+    materials: ["bacinella", "contenitori vari", "imbuto", "cucchiai"],
+    description: "Riempi una bacinella bassa con poca acqua. Disponi intorno contenitori, un imbuto, cucchiai di diversi materiali. Lascia esplorare.",
+    steps: [
+      "Proteggi il pavimento con un telo impermeabile. Metti la bacinella al centro.",
+      "Aggiungi 3–4 oggetti: un imbuto, una tazza, un cucchiaio, una spugna.",
+      "Siediti e osserva. Puoi fare commenti sulla consistenza: 'L'acqua scivola via.'",
+      "Varia: aggiungi un cubetto di ghiaccio, un po' di bolle di sapone."
+    ],
+    why: "L'acqua è il materiale sensoriale per eccellenza. Stimola la scoperta di cause ed effetti, e mantiene l'attenzione a lungo senza bisogno di direzione."
+  },
+  {
+    id: 8, title: "Cesta della biancheria", method: "montessori",
+    duration: "10–15 min", ageMin: 13, ageMax: 30,
+    materials: ["cesta della biancheria", "calzini da abbinare"],
+    description: "Coinvolgi Riky in una piccola attività reale: abbinare i calzini. Versa i calzini sul pavimento e mostragli come trovare il compagno.",
+    steps: [
+      "Prendete la cesta dei panni insieme. Siedetevi sul pavimento.",
+      "Versa i calzini in modo casuale. Mostra come prenderne uno e cercarne il simile.",
+      "Quando li trova (anche approssimativamente) celebra con calma: 'Li hai trovati!'",
+      "Lascia che arrotolerli sia il tuo compito — il gesto è ancora troppo fine."
+    ],
+    why: "Le attività reali di vita pratica Montessori costruiscono senso di competenza e appartenenza alla famiglia. Non è un gioco finto — è contributo vero."
+  },
+  {
+    id: 9, title: "Costruzione libera con scatole", method: "reggio",
+    duration: "20–30 min", ageMin: 12, ageMax: 36,
+    materials: ["scatole di cartone varie", "nastro adesivo di carta", "tempere"],
+    description: "Raccogli scatole di diverse dimensioni e lasciale a disposizione di Riky senza istruzioni. Osserva cosa costruisce o inventa.",
+    steps: [
+      "Disponi 5–8 scatole di dimensioni diverse sul pavimento.",
+      "Siediti a distanza e non suggerire. Se impila, crolla, riprova — è tutto parte del processo.",
+      "Dopo un po' puoi partecipare solo se invitato: 'Posso mettere questa qui?'",
+      "Se vuole dipingerle, aggiungi tempere — diventa un progetto su più giorni."
+    ],
+    why: "Le scatole sono materiale 'aperto': non hanno un uso predefinito. Stimolano il pensiero creativo e la narrazione spontanea — linguaggi Reggio."
+  },
+  {
+    id: 10, title: "Rotolamento sul tappeto", method: "pikler",
+    duration: "15 min", ageMin: 8, ageMax: 24,
+    materials: ["tappeto morbido", "spazio libero"],
+    description: "Crea uno spazio libero sul tappeto. Inizia tu a rotolare lentamente e osserva se Riky ti imita. Non forzare — solo invita con la presenza.",
+    steps: [
+      "Libera il tappeto da oggetti. Siediti a terra con Riky.",
+      "Rotola lentamente su un fianco, sorridi, e aspetta.",
+      "Se imita, lascialo fare a modo suo. Se non imita, non insistere.",
+      "Puoi usare una pallina che rotola per stimolare l'imitazione indiretta."
+    ],
+    why: "Il rotolamento attiva la propriocezione e il sistema vestibolare. In Pikler il movimento è sempre risposta del bambino — mai richiesta dell'adulto."
+  },
+  {
+    id: 11, title: "Libro di stoffa o cartonato", method: "misto",
+    duration: "10–15 min", ageMin: 6, ageMax: 24,
+    materials: ["libro cartonato con immagini semplici"],
+    description: "Leggi insieme a Riky — non come recita, ma come dialogo. Segui il suo ritmo: se vuole tornare indietro, torna. Se vuole toccare le figure, lascialo.",
+    steps: [
+      "Siediti con Riky in braccio o affiancati. Apri il libro senza fretta.",
+      "Nomina le cose che vede senza fare domande continue: 'Guarda, il cane.'",
+      "Se indica qualcosa, rispondi: 'Sì, è la palla rossa. Rotonda.'",
+      "Se chiude il libro o cambia pagina velocemente — seguilo, è lui che guida."
+    ],
+    why: "La lettura condivisa costruisce vocabolario, relazione e amore per i simboli. L'importante è il tono caldo, non la perfezione nella storia."
+  },
+  {
+    id: 12, title: "Esplorare la sabbia o il fango", method: "reggio",
+    duration: "30 min", ageMin: 12, ageMax: 48,
+    materials: ["sabbionaia o fango", "contenitori", "cucchiai"],
+    description: "Porta Riky in contatto con la terra. Fango o sabbia sono materiali sensoriali potentissimi. L'obiettivo è il contatto diretto, non un prodotto finito.",
+    steps: [
+      "Se hai un giardino: crea un angolo con terra umida o usa la sabbionaia.",
+      "Togli le scarpe a Riky se la temperatura lo permette.",
+      "Offri un paio di contenitori e un cucchiaio — poi sparisci dallo spazio attivo.",
+      "Puoi fotografare ciò che crea — è documentazione Reggio."
+    ],
+    why: "Il contatto con la terra è fondamentale per lo sviluppo sensoriale e il sistema immunitario. Reggio lo chiama 'linguaggio della materia'."
+  },
+  {
+    id: 13, title: "Infilare anelli o cilindri", method: "montessori",
+    duration: "10 min", ageMin: 13, ageMax: 30,
+    materials: ["anelli di legno", "piolo verticale", "o versione fai-da-te"],
+    description: "Crea o procura un semplice piolo verticale su base stabile. Mostra come infilare un anello, poi cedi a Riky.",
+    steps: [
+      "Metti il piolo su una superficie stabile a livello di Riky seduto.",
+      "Prendi un anello, mostra il gesto lentamente, poi posalo vicino a Riky.",
+      "Se prova e non riesce, aspetta. Se si frustra molto, guida la mano una volta sola.",
+      "Quando finisce, esulta insieme — il completamento è parte del ciclo Montessori."
+    ],
+    why: "Questo esercizio sviluppa la coordinazione fine e il senso di sequenza. Il ciclo 'inizio–lavoro–completamento' è centrale in Montessori."
+  },
+  {
+    id: 14, title: "Danza libera con musica", method: "misto",
+    duration: "15 min", ageMin: 8, ageMax: 48,
+    materials: ["musica varia", "spazio libero"],
+    description: "Metti musica di generi diversi e danza con Riky — liberi, senza passi da imparare. Osserva come risponde a ritmi diversi.",
+    steps: [
+      "Inizia con qualcosa di ritmico ma non troppo veloce.",
+      "Balla tu per primo — lui osserverà e poi parteciperà spontaneamente.",
+      "Cambia genere: classica, jazz, folk, tamtam — osserva le reazioni.",
+      "Puoi fare una pausa improvvisa nel mezzo — vedi se la anticipa."
+    ],
+    why: "La musica è uno dei cento linguaggi Reggio. Il movimento libero a ritmo sviluppa l'orecchio musicale, la propriocezione (Pikler) e l'espressione emotiva."
+  },
+  {
+    id: 15, title: "Smistare oggetti per colore o forma", method: "montessori",
+    duration: "10–15 min", ageMin: 15, ageMax: 36,
+    materials: ["oggetti colorati", "3 ciotole o 3 sacchetti colorati"],
+    description: "Prepara tre ciotole di colori diversi e una manciata di oggetti colorati (tappi, bottoni grandi, cubetti). Mostra come mettere il rosso col rosso.",
+    steps: [
+      "Usa oggetti già in casa — tappi di bottiglia colorati vanno benissimo.",
+      "Mostra il gesto una sola volta con un solo colore. Poi lascia fare.",
+      "Non correggere se sbaglia — osserva come ragiona.",
+      "Versione avanzata (dai 18 mesi): smistare per forma invece che per colore."
+    ],
+    why: "La categorizzazione è un'operazione cognitiva fondamentale. In Montessori il 'periodo sensibile per l'ordine' è tra 1 e 3 anni — questo lo nutre."
+  },
+  {
+    id: 16, title: "Scala da arrampicata (Pikler triangle)", method: "pikler",
+    duration: "20–30 min", ageMin: 8, ageMax: 36,
+    materials: ["triangolo Pikler o scala bassa", "tappeto sotto"],
+    description: "Posiziona la struttura su un tappeto morbido. Non mostrare come si usa. Siediti vicino e lascia che Riky la esplori nel suo tempo.",
+    steps: [
+      "Verifica la stabilità della struttura prima di ogni uso.",
+      "Siediti a circa un metro — presenza rassicurante, non interventista.",
+      "Se si blocca in un punto difficile: 'Sei lì, ce la fai.' — non toglierlo tu.",
+      "Se vuole scendere ma non sa come, guida solo la posizione dei piedi, non il corpo."
+    ],
+    why: "Pikler ha dimostrato che i bambini sviluppano sicurezza motoria duratura quando risolvono i problemi fisici da soli. L'adulto che 'aiuta troppo' priva il bambino dell'esperienza."
+  },
+  {
+    id: 17, title: "Manipolare pasta di sale o pongo", method: "reggio",
+    duration: "20 min", ageMin: 12, ageMax: 48,
+    materials: ["pasta di sale (farina+sale+acqua)", "mattarello piccolo", "formine"],
+    description: "Prepara insieme a Riky la pasta di sale. Il processo di impasto è già l'attività principale — più della forma finale.",
+    steps: [
+      "Mescola farina, sale e acqua davanti a Riky. Lascialo mettere le mani nell'impasto.",
+      "Non mostrare 'cosa fare' — osserva. Schiaccia? Rotola? Strappa?",
+      "Aggiungi formine o un mattarello piccolo solo dopo un po'.",
+      "Le forme che crea non devono assomigliare a niente — va benissimo così."
+    ],
+    why: "La manipolazione della materia è linguaggio primario. Schiaccaare, rotolare, strappare — sono azioni che costruiscono comprensione della fisica e del controllo motorio."
+  },
+  {
+    id: 18, title: "Gioco dello specchio", method: "pikler",
+    duration: "10–15 min", ageMin: 6, ageMax: 24,
+    materials: ["specchio grande (sicuro, infrangibile)", "spazio a terra"],
+    description: "Posiziona uno specchio infrangibile a livello di Riky. Siediti con lui davanti. Osserva com'è la sua interazione con il proprio riflesso.",
+    steps: [
+      "Assicurati che lo specchio sia fisso e sicuro. Siediti con Riky davanti.",
+      "Non spiegare cosa vede. Osserva le sue reazioni — indicazione di sé, meraviglia, sorrisi.",
+      "Puoi fare smorfie o movimenti lenti e vedere se li imita.",
+      "Nomina le parti del corpo se le tocca nello specchio: 'Naso. Orecchio.'"
+    ],
+    why: "Il riconoscimento di sé nello specchio (che emerge tra 15 e 24 mesi) è un indicatore chiave di autoconsapevolezza. L'esplorazione libera davanti allo specchio è ricchissima."
+  },
+  {
+    id: 19, title: "Riempire e svuotare borsa o scatola", method: "misto",
+    duration: "15 min", ageMin: 10, ageMax: 24,
+    materials: ["borsa morbida", "oggetti vari non pericolosi"],
+    description: "Prepara una borsa con oggetti di casa dentro. Lascia che Riky la svuoti e poi la riempia come vuole lui.",
+    steps: [
+      "Metti nella borsa 6–8 oggetti di dimensioni diverse.",
+      "Dammela a Riky senza spiegazioni. Osserva come la esplora.",
+      "Molti bambini svuotano, poi riempiono, poi svuotano — è schema cognitivo normale.",
+      "Puoi variare gli oggetti ogni settimana per mantenere la curiosità viva."
+    ],
+    why: "Il ciclo svuota/riempi è uno schema d'azione (schema di Piaget). Ripeterlo non è noia — è consolidamento cognitivo fondamentale."
+  },
+  {
+    id: 20, title: "Osservare animali dal vivo", method: "reggio",
+    duration: "variabile", ageMin: 12, ageMax: 60,
+    materials: ["nessuno"],
+    description: "Porta Riky ad osservare un animale: il vostro cane, un uccello in giardino, le formiche sul marciapiede. Fermati quanto lui vuole.",
+    steps: [
+      "Non avere fretta. Se si ferma 10 minuti su una formica — è perfetto.",
+      "Nomina ciò che vede: 'Guarda, porta qualcosa. Dove va?'",
+      "Non spiegare tutto — lascia che la domanda resti aperta. La curiosità è il fine.",
+      "Se tocca (il cane, l'erba) — osserva la sua reazione sensoriale senza fretta di andare avanti."
+    ],
+    why: "Il mondo naturale è il curriculum più ricco disponibile. Reggio lo chiama 'terzo educatore' nella sua forma più pura."
+  }
+];
+
+// ===================== MILESTONES DATABASE =====================
+const MILESTONES = {
+  phases: [
+    {
+      ageMin: 12, ageMax: 15,
+      title: "L'Esploratore Incerto",
+      desc: "Muove i primi passi autonomi, usa 1–5 parole, esplora tutto con le mani e la bocca. Capisce molto più di quanto sembra."
+    },
+    {
+      ageMin: 15, ageMax: 18,
+      title: "L'Esploratore Curioso",
+      desc: "Cammina con più sicurezza, inizia a correre. Usa 5–20 parole. Imita azioni degli adulti. Capisce ordini semplici. Vuole autonomia ma ha ancora bisogno di basi sicure."
+    },
+    {
+      ageMin: 18, ageMax: 24,
+      title: "Il Comunicatore",
+      desc: "Vocabolario in rapida espansione (50+ parole, poi mini-frasi). Inizia il gioco simbolico. Corre, arrampica, sale scale con sostegno. Forte volontà propria — fase del 'no' emerge."
+    },
+    {
+      ageMin: 24, ageMax: 30,
+      title: "Il Narratore",
+      desc: "Frasi di 2–3 parole. Gioco simbolico elaborato. Corre, salta, sale e scende scale. Inizia a capire turni e regole semplici. Forte identità — 'mio' e 'io' dominano."
+    }
+  ],
+  domains: [
+    {
+      key: "motorio", icon: "🏃", label: "Sviluppo Motorio",
+      items: [
+        { text: "Cammina in modo stabile senza cadere frequentemente", months: [12,15] },
+        { text: "Sale le scale tenendo un sostegno", months: [14,17] },
+        { text: "Corre (anche se ancora goffo)", months: [15,18] },
+        { text: "Calcia una palla", months: [15,20] },
+        { text: "Scende le scale tenendo sostegno", months: [18,22] },
+        { text: "Salta sul posto con entrambi i piedi", months: [22,28] },
+        { text: "Stazione eretta su un piede per 1–2 secondi", months: [24,30] },
+        { text: "Si china e raccoglie un oggetto da terra senza cadere", months: [15,20] },
+        { text: "Tira o spinge giocattoli mentre cammina", months: [16,22] },
+        { text: "Si arrampica su una sedia o sul divano", months: [18,26] }
+      ]
+    },
+    {
+      key: "linguaggio", icon: "💬", label: "Linguaggio e Comunicazione",
+      items: [
+        { text: "Usa 3–5 parole con significato stabile", months: [12,15] },
+        { text: "Indica con il dito ciò che vuole (pointing protodichiarativo)", months: [12,16] },
+        { text: "Capisce ordini semplici senza gesto ('prendi la scarpa')", months: [14,18] },
+        { text: "Usa 10–20 parole diverse", months: [16,20] },
+        { text: "Nomina almeno 5 oggetti familiari", months: [17,21] },
+        { text: "Vocabolario di 50+ parole", months: [18,24] },
+        { text: "Prime frasi di due parole ('papà via', 'ancora biscotto')", months: [20,26] },
+        { text: "Indica 2–3 parti del corpo se richiesto", months: [18,24] },
+        { text: "Dice 'no' con intenzione", months: [16,22] },
+        { text: "Combina parola e gesto per comunicare", months: [16,22] }
+      ]
+    },
+    {
+      key: "cognitivo", icon: "🧠", label: "Sviluppo Cognitivo",
+      items: [
+        { text: "Cerca oggetti nascosti sotto un panno o dietro uno schermo", months: [10,14] },
+        { text: "Imita azioni semplici viste (spazzolare, telefonare)", months: [12,16] },
+        { text: "Smista oggetti per colore o forma (approssimativamente)", months: [15,22] },
+        { text: "Gioco funzionale: mette la tazza sul piatto, 'guida' la macchinina", months: [14,18] },
+        { text: "Gioco simbolico: fa finta di dormire, di mangiare", months: [16,22] },
+        { text: "Incastra forme semplici (cerchio, quadrato) in tavola sagomata", months: [17,24] },
+        { text: "Gioco simbolico con personaggi (bambola, pupazzo)", months: [20,28] },
+        { text: "Impila 3–4 cubi o oggetti", months: [16,22] },
+        { text: "Scarabocchia con un pastello", months: [15,24] },
+        { text: "Completa un incastro/puzzle di 2–3 pezzi", months: [20,28] }
+      ]
+    },
+    {
+      key: "sociale", icon: "❤️", label: "Sviluppo Sociale ed Emotivo",
+      items: [
+        { text: "Si riconosce allo specchio (tocca il naso col punto rosso)", months: [15,24] },
+        { text: "Mostra affetto verso persone care (abbraccia, bacia)", months: [12,18] },
+        { text: "Mostra gelosia o competizione per l'attenzione", months: [14,20] },
+        { text: "Reagisce alle emozioni degli altri (se piange qualcuno, si preoccupa)", months: [14,20] },
+        { text: "Inizia a imitare i lavori di casa (spazzare, pulire)", months: [15,22] },
+        { text: "Gioca accanto ad altri bambini (gioco parallelo)", months: [18,24] },
+        { text: "Inizia a capire turni in attività semplici", months: [22,30] },
+        { text: "Porge il braccio o il piede per essere vestito", months: [16,24] },
+        { text: "Imita altri bambini nel gioco", months: [18,28] },
+        { text: "Offre o porge un oggetto per consolare chi è triste", months: [20,30] }
+      ]
+    }
+  ]
+};
+
+// ===================== ENVIRONMENT DATABASE =====================
+const ENVIRONMENTS = [
+  {
+    ageMin: 12, ageMax: 20,
+    title: "Fase Esploratore (12–20 mesi)",
+    reggio: [
+      "Angolo sensoriale: cestino con oggetti di materiali diversi (legno, metallo, tessuto, carta)",
+      "Libri di tessuto o cartonati con immagini grandi a portata di mano, sul pavimento",
+      "Specchio infrangibile fissato a parete a livello del bambino",
+      "Luce naturale abbondante — evita ambienti bui durante il gioco attivo",
+      "Materiali naturali accessibili: sassi lisci, pigna, foglie secche in contenitore aperto"
+    ],
+    montessori: [
+      "Mensola bassa con 3–4 giochi o oggetti alla volta — meno è più",
+      "Rotazione settimanale dei materiali: togli ciò che non usa, aggiungi una novità",
+      "Cesta della biancheria e oggetti reali accessibili (cucchiai di legno, tazze leggere)",
+      "Scalino o panchetto davanti al lavandino per autonomia",
+      "Area pasti con sedia e tavolo alla giusta altezza — non sempre in braccio"
+    ],
+    pikler: [
+      "Spazio libero sul pavimento: rimuovi ostacoli — serve area ampia per il movimento",
+      "Superficie variata: tappeto morbido, superficie liscia, cuscino — non solo pavimento uniforme",
+      "Triangolo Pikler o scaletta bassa con tappeto morbido sotto",
+      "Evita seggioloni e contenitori che limitano il movimento per lunghi periodi",
+      "Zona esterna accessibile ogni giorno — anche breve"
+    ]
+  },
+  {
+    ageMin: 20, ageMax: 30,
+    title: "Fase Comunicatore (20–30 mesi)",
+    reggio: [
+      "Angolo arte fisso: carta, tempere lavabili, pennelli, cera da modellare — sempre accessibili",
+      "Parete o lavagna bassa dove appendere le sue opere (lui deve poterle vedere)",
+      "Cassettina con materiali di recupero: rotoli, scatoline, stoffe — per costruzioni libere",
+      "Fotografie di famiglia, natura, animali appese a livello occhi — nutrono la narrazione",
+      "Libri di immagini bella fotografia (non solo cartoni) — amplia il senso estetico"
+    ],
+    montessori: [
+      "Angolo vita pratica: annaffiatoio piccolo, spazzola, paletta — cose vere in miniatura",
+      "Vestiti con chiusure semplici accessibili — inizia l'autonomia nell'abbigliamento",
+      "Cucina accessibile per attività semplici: mescolare, versare con supervisione",
+      "Cassetti e mensole basse organizzati — lui deve trovare e rimettere da solo",
+      "Elimina il troppo: confusione di oggetti spegne la concentrazione"
+    ],
+    pikler: [
+      "Percorso motorio variabile: non lasciarlo fisso — cambia disposizione per mantenere sfida",
+      "Spazio outdoor quotidiano: anche 20 minuti di parco libero",
+      "Possibilità di correre, rotolare, arrampicare — ambienti che lo permettono",
+      "Non anticipare le sue difficoltà fisiche — lascia che provi e riprovi"
+    ]
+  }
+];
+
+// ===================== INIT =====================
+const age = getAgeDetails(RIKY_BIRTHDATE);
+
+async function init() {
+  const now = new Date();
+  document.getElementById('headerDate').textContent =
+    now.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('ageBadge').textContent = age.totalMonths + ' mesi';
+  document.getElementById('ageText').textContent =
+    `${age.totalMonths} mesi e ${age.remDays} giorni`;
+
+  renderActivity();
+  await loadMilestonesCache();
+  renderMilestones();
+  renderAmbiente();
+  renderDiary('all');
+  renderHealth();
+}
+
+// ===================== TAB NAVIGATION =====================
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('sec-' + tab).classList.add('active');
+  if (tab === 'diario') renderDiary(currentFilter);
+  if (tab === 'crescita') renderHealth();
+}
+
+// ===================== ACTIVITY =====================
+let currentActivityIndex = null;
+
+function getDailyActivityIndex() {
+  const eligible = ACTIVITIES.filter(a => age.totalMonths >= a.ageMin && age.totalMonths <= a.ageMax);
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate();
+  return { activity: eligible[seed % eligible.length], eligible };
+}
+
+function renderActivity(forceIndex) {
+  const { activity, eligible } = getDailyActivityIndex();
+  let act = activity;
+  if (forceIndex !== undefined) act = eligible[forceIndex % eligible.length];
+
+  const methodLabels = { reggio:'Reggio', montessori:'Montessori', pikler:'Pikler', misto:'Integrato' };
+  const badgeClass = { reggio:'badge-reggio', montessori:'badge-montessori', pikler:'badge-pikler', misto:'badge-misto' };
+
+  document.getElementById('activity-content').innerHTML = `
+    <span class="method-badge ${badgeClass[act.method]}">${methodLabels[act.method]}</span>
+    <h2>${act.title}</h2>
+    <div class="activity-meta">
+      <span class="meta-chip">⏱ ${act.duration}</span>
+      <span class="meta-chip">👶 ${act.ageMin}–${act.ageMax} mesi</span>
+    </div>
+    <p>${act.description}</p>
+    <div class="materials-list">
+      ${act.materials.map(m => `<span class="material-tag">${m}</span>`).join('')}
+    </div>
+    <ul class="activity-steps" style="margin-top:14px">
+      ${act.steps.map((s,i) => `
+        <li>
+          <span class="step-num">${i+1}</span>
+          <span>${s}</span>
+        </li>
+      `).join('')}
+    </ul>
+    <div class="why-box">${act.why}</div>
+    <button class="btn btn-secondary" onclick="showRandomActivity()" style="margin-top:14px">
+      🎲 Mostra un'altra attività
+    </button>
+  `;
+}
+
+let randomOffset = 0;
+function showRandomActivity() {
+  const { eligible } = getDailyActivityIndex();
+  randomOffset = (randomOffset + Math.floor(Math.random() * (eligible.length - 1)) + 1) % eligible.length;
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate();
+  const baseIdx = seed % eligible.length;
+  renderActivity((baseIdx + randomOffset) % eligible.length);
+}
+
+// ===================== MILESTONES =====================
+let milestonesCache = {};
+
+async function loadMilestonesCache() {
+  const res = await fetch('/api/milestones');
+  milestonesCache = await res.json();
+}
+
+function renderMilestones() {
+  const m = age.totalMonths;
+  const phase = MILESTONES.phases.find(p => m >= p.ageMin && m < p.ageMax)
+    || MILESTONES.phases[MILESTONES.phases.length - 1];
+
+  document.getElementById('phase-title').textContent = phase.title;
+  document.getElementById('phase-desc').textContent = phase.desc;
+
+  let html = '';
+  MILESTONES.domains.forEach(domain => {
+    const items = domain.items.filter(item =>
+      m >= item.months[0] - 2 && m <= item.months[1] + 3
+    );
+    if (!items.length) return;
+
+    const doneCount = items.filter(it => milestonesCache[it.text]).length;
+    const pct = Math.round(doneCount / items.length * 100);
+
+    html += `<div class="card">
+      <div class="domain-title">
+        <span class="domain-icon">${domain.icon}</span>
+        ${domain.label}
+      </div>
+      ${items.map(item => {
+        const id = 'ms_' + Math.abs(item.text.split('').reduce((a,c) => (a<<5)-a+c.charCodeAt(0)|0, 0));
+        const done = !!milestonesCache[item.text];
+        return `
+          <div class="milestone-item ${done ? 'done' : ''}" id="mi_${id}">
+            <input type="checkbox" id="${id}" ${done ? 'checked' : ''}
+              onchange="toggleMilestone('${item.text.replace(/'/g,"\\'")}', this)">
+            <label for="${id}">
+              ${item.text}
+              <span class="milestone-note">tipico ${item.months[0]}–${item.months[1]} mesi</span>
+            </label>
+          </div>
+        `;
+      }).join('')}
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label"><span>Completati</span><span>${doneCount}/${items.length}</span></div>
+    </div>`;
+  });
+
+  document.getElementById('milestone-content').innerHTML = html;
+}
+
+async function toggleMilestone(text, checkbox) {
+  milestonesCache[text] = checkbox.checked;
+  const mi = checkbox.closest('.milestone-item');
+  if (checkbox.checked) mi.classList.add('done');
+  else mi.classList.remove('done');
+  await fetch('/api/milestones', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(milestonesCache)
+  });
+  renderMilestones();
+}
+
+// ===================== AMBIENTE =====================
+function renderAmbiente() {
+  const m = age.totalMonths;
+  const env = ENVIRONMENTS.find(e => m >= e.ageMin && m < e.ageMax)
+    || ENVIRONMENTS[ENVIRONMENTS.length - 1];
+
+  const methodColors = {
+    reggio: { badge: 'badge-reggio', label: 'Reggio Emilia' },
+    montessori: { badge: 'badge-montessori', label: 'Montessori' },
+    pikler: { badge: 'badge-pikler', label: 'Pikler' }
+  };
+
+  let html = `<div class="card"><div class="card-title">Fase attuale</div><h3>${env.title}</h3></div>`;
+
+  ['reggio','montessori','pikler'].forEach(key => {
+    const m = methodColors[key];
+    html += `<div class="card env-section">
+      <div class="env-method-header" onclick="toggleEnv(this)">
+        <div class="left">
+          <span class="method-badge ${m.badge}" style="margin:0;font-size:10px">${m.label}</span>
+        </div>
+        <span style="color:var(--text-soft);font-size:18px;font-weight:300;transform:rotate(0deg);transition:transform 0.2s" class="chevron">›</span>
+      </div>
+      <div class="env-body">
+        ${env[key].map(item => `<div class="env-item">${item}</div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('ambiente-content').innerHTML = html;
+}
+
+function toggleEnv(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.chevron');
+  const collapsed = body.classList.toggle('collapsed');
+  chevron.style.transform = collapsed ? 'rotate(90deg)' : 'rotate(0deg)';
+}
+
+// ===================== DIARY =====================
+let selectedMood = null;
+let currentFilter = 'all';
+let selectedPhotoDataUrl = null;
+
+function selectMood(btn) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedMood = btn.dataset.mood;
+}
+
+function resizeImage(file, maxPx, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxPx || h > maxPx) {
+        if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+        else       { w = Math.round(w * maxPx / h); h = maxPx; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = url;
+  });
+}
+
+async function previewPhoto(input) {
+  if (!input.files[0]) return;
+  const dataUrl = await resizeImage(input.files[0], 1200, 0.75);
+  selectedPhotoDataUrl = dataUrl;
+  document.getElementById('photoPreviewArea').innerHTML = `
+    <div class="photo-preview">
+      <img src="${dataUrl}" alt="anteprima">
+      <button class="photo-remove" onclick="removePhoto()">×</button>
+    </div>`;
+}
+
+function removePhoto() {
+  selectedPhotoDataUrl = null;
+  document.getElementById('photoPreviewArea').innerHTML = '';
+  document.getElementById('photoInput').value = '';
+}
+
+async function saveDiaryEntry() {
+  const text = document.getElementById('diaryInput').value.trim();
+  if (!text && !selectedPhotoDataUrl) return;
+
+  const id = Date.now();
+  let photoFilename = null;
+
+  if (selectedPhotoDataUrl) {
+    const res = await fetch('/api/photo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataUrl: selectedPhotoDataUrl, id })
+    });
+    const data = await res.json();
+    photoFilename = data.filename;
+  }
+
+  const entry = {
+    text,
+    mood: selectedMood || '',
+    date: new Date().toISOString(),
+    id,
+    ageMonths: age.totalMonths,
+    photo: photoFilename
+  };
+
+  await fetch('/api/diary', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry)
+  });
+
+  document.getElementById('diaryInput').value = '';
+  selectedMood = null;
+  selectedPhotoDataUrl = null;
+  document.getElementById('photoPreviewArea').innerHTML = '';
+  document.getElementById('photoInput').value = '';
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+
+  await renderDiary(currentFilter);
+}
+
+async function openLightbox(src) {
+  let url = src;
+  if (src && src.indexOf('data:') !== 0) url = (await idbGet(src)) || PH;
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+function filterDiary(filter, chip) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  renderDiary(filter);
+}
+
+let diaryCache = [];
+
+async function renderDiary(filter) {
+  const container = document.getElementById('diary-entries');
+  const res = await fetch('/api/diary');
+  diaryCache = await res.json();
+  const filtered = filter === 'all' ? diaryCache : diaryCache.filter(e => e.mood === filter);
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="diary-empty">Nessuna osservazione ancora.<br>Inizia a documentare i momenti di Riky.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(entry => entryHtml(entry)).join('');
+}
+
+function entryHtml(entry) {
+  const d = new Date(entry.date);
+  const dateStr = d.toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'long' }) +
+    ' · ' + d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }) +
+    (entry.ageMonths ? ` · ${entry.ageMonths} mesi` : '');
+  const photoHtml = entry.photo
+    ? `<img class="diary-entry-photo" src="${PH}" data-ph="${entry.photo}" alt="foto"
+           onclick="openLightbox('${entry.photo}')">`
+    : '';
+  return `
+    <div class="diary-entry" id="entry-${entry.id}">
+      ${photoHtml}
+      <div class="diary-entry-date">${entry.mood ? entry.mood + ' · ' : ''}${dateStr}</div>
+      ${entry.text ? `<div class="diary-entry-text">${entry.text.replace(/</g,'&lt;')}</div>` : ''}
+      <div class="diary-actions">
+        <button class="diary-edit" onclick="editEntry(${entry.id})" title="Modifica">✏️</button>
+        <button class="diary-delete" onclick="deleteEntry(${entry.id})" title="Elimina">×</button>
+      </div>
+    </div>
+  `;
+}
+
+function editEntry(id) {
+  const entry = diaryCache.find(e => e.id === id);
+  if (!entry) return;
+  const el = document.getElementById(`entry-${id}`);
+  const moods = ['😊','😄','😴','😠','🤒'];
+  const moodBtns = moods.map(m =>
+    `<button class="mood-btn ${entry.mood===m?'selected':''}" data-mood="${m}"
+       onclick="this.parentNode.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected')">${m}</button>`
+  ).join('');
+
+  const photoArea = entry.photo
+    ? `<div class="edit-photo-thumb">
+         <img src="${PH}" data-ph="${entry.photo}" alt="foto" id="editThumb-${id}">
+         <div class="edit-photo-actions">
+           <button onclick="document.getElementById('editPhotoInput-${id}').click()">🔄 Cambia</button>
+           <button onclick="removeEditPhoto(${id})" style="color:#C0392B">🗑 Rimuovi</button>
+         </div>
+       </div>`
+    : `<button class="photo-btn" onclick="document.getElementById('editPhotoInput-${id}').click()">📷 Aggiungi foto</button>`;
+
+  el.classList.add('editing');
+  el.innerHTML = `
+    <div class="mood-label">Umore</div>
+    <div class="edit-mood-row" id="editMoods-${id}">${moodBtns}</div>
+    <textarea class="diary-textarea" id="editText-${id}" style="margin-bottom:8px">${entry.text || ''}</textarea>
+    <div class="edit-photo-area" id="editPhotoArea-${id}">${photoArea}</div>
+    <input type="file" id="editPhotoInput-${id}" accept="image/*" style="display:none"
+           onchange="previewEditPhoto(this,${id})">
+    <div class="edit-actions">
+      <button class="btn btn-primary" onclick="saveEditEntry(${id})">✓ Salva</button>
+      <button class="btn btn-secondary" onclick="cancelEdit(${id})">Annulla</button>
+    </div>
+  `;
+}
+
+function cancelEdit(id) {
+  const entry = diaryCache.find(e => e.id === id);
+  if (!entry) return;
+  const el = document.getElementById(`entry-${id}`);
+  el.classList.remove('editing');
+  el.outerHTML = entryHtml(entry);
+}
+
+async function previewEditPhoto(input, id) {
+  if (!input.files[0]) return;
+  const dataUrl = await resizeImage(input.files[0], 1200, 0.75);
+  input.dataset.dataUrl = dataUrl;
+  document.getElementById(`editPhotoArea-${id}`).innerHTML = `
+    <div class="edit-photo-thumb">
+      <img src="${dataUrl}" alt="anteprima" id="editThumb-${id}">
+      <div class="edit-photo-actions">
+        <button onclick="document.getElementById('editPhotoInput-${id}').click()">🔄 Cambia</button>
+        <button onclick="clearEditPhotoPreview(${id})" style="color:#C0392B">🗑 Rimuovi</button>
+      </div>
+    </div>
+    <input type="file" id="editPhotoInput-${id}" accept="image/*" style="display:none"
+           onchange="previewEditPhoto(this,${id})" data-dataurl="${dataUrl}">
+  `;
+}
+
+function removeEditPhoto(id) {
+  const entry = diaryCache.find(e => e.id === id);
+  const hasExisting = entry && entry.photo;
+  document.getElementById(`editPhotoArea-${id}`).innerHTML =
+    `<button class="photo-btn" onclick="document.getElementById('editPhotoInput-${id}').click()">📷 Aggiungi foto</button>
+     <input type="file" id="editPhotoInput-${id}" accept="image/*" style="display:none"
+            onchange="previewEditPhoto(this,${id})" ${hasExisting ? 'data-remove="true"' : ''}>`;
+}
+
+function clearEditPhotoPreview(id) { removeEditPhoto(id); }
+
+async function saveEditEntry(id) {
+  const entry = diaryCache.find(e => e.id === id);
+  const text  = document.getElementById(`editText-${id}`).value.trim();
+  const moodEl = document.querySelector(`#editMoods-${id} .mood-btn.selected`);
+  const mood  = moodEl ? moodEl.dataset.mood : (entry.mood || '');
+  const photoInput = document.getElementById(`editPhotoInput-${id}`);
+
+  const payload = { text, mood };
+
+  if (photoInput && photoInput.dataset.dataUrl) {
+    payload.newPhotoDataUrl = photoInput.dataset.dataUrl;
+  } else if (photoInput && photoInput.dataset.remove) {
+    payload.removePhoto = true;
+  }
+
+  await fetch(`/api/diary/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  await renderDiary(currentFilter);
+}
+
+async function deleteEntry(id) {
+  if (!confirm('Eliminare questa osservazione?')) return;
+  await fetch(`/api/diary/${id}`, { method: 'DELETE' });
+  await renderDiary(currentFilter);
+}
+
+// ===================== CRESCITA & SALUTE =====================
+let healthCache = [];
+
+async function renderHealth() {
+  const container = document.getElementById('health-content');
+  const res = await fetch('/api/health');
+  healthCache = await res.json();
+
+  if (!healthCache.length) {
+    container.innerHTML = `<div class="diary-empty">Nessuna rilevazione ancora.<br>Aggiungi la prima visita o misurazione qui sopra.</div>`;
+    return;
+  }
+
+  const last = healthCache[0];
+  let html = `<div class="card">
+    <div class="card-title">Ultima rilevazione</div>
+    <h3>${last.type || 'Misurazione'}</h3>
+    <div class="health-date">${fmtHealthDate(last.date)}${last.ageMonths != null ? ' · ' + last.ageMonths + ' mesi' : ''}</div>
+    <div class="health-metrics">
+      ${metricBox('Peso', last.weight, 'kg', last.percentiles, 'peso')}
+      ${metricBox('Altezza', last.height, 'cm', last.percentiles, 'alt')}
+      ${metricBox('Circonf. cranica', last.headCirc, 'cm', last.percentiles, 'cc')}
+      ${metricBox('BMI', last.bmi, '', '', '')}
+    </div>
+    ${last.percentiles ? `<p style="font-size:12px;color:var(--text-soft)"><b>Percentili:</b> ${last.percentiles}</p>` : ''}
+    ${last.notes ? `<div class="why-box" style="font-style:normal">${last.notes.replace(/</g,'&lt;')}</div>` : ''}
+    ${last.photo ? `<img class="health-entry-photo" src="${PH}" data-ph="${last.photo}" onclick="openLightbox('${last.photo}')">` : ''}
+  </div>`;
+
+  if (healthCache.length > 1) {
+    html += `<div class="card"><div class="card-title">Storico</div>`;
+    html += healthCache.slice(1).map(h => `
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div class="health-date">${fmtHealthDate(h.date)}${h.ageMonths != null ? ' · ' + h.ageMonths + ' mesi' : ''} — ${h.type || 'Misurazione'}</div>
+        <div style="font-size:13px;color:var(--text-soft)">
+          ${h.weight ? '⚖️ ' + h.weight + ' kg ' : ''}${h.height ? '· 📏 ' + h.height + ' cm ' : ''}${h.headCirc ? '· 🧠 ' + h.headCirc + ' cm ' : ''}${h.bmi ? '· BMI ' + h.bmi : ''}
+        </div>
+        ${h.notes ? `<div style="font-size:12px;color:var(--text-soft);margin-top:3px">${h.notes.replace(/</g,'&lt;')}</div>` : ''}
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function metricBox(label, val, unit, perc, key) {
+  if (val == null || val === '') return '';
+  let p = '';
+  if (perc && key) {
+    const re = new RegExp(key + '[^0-9]*([0-9]+(?:[–\\-][0-9]+)?\\s*°?)', 'i');
+    const mm = perc.match(re);
+    if (mm) p = `<div class="mperc">${mm[1].trim()} perc</div>`;
+  }
+  return `<div class="metric"><div class="mlabel">${label}</div><div class="mval">${val}${unit ? ' ' + unit : ''}</div>${p}</div>`;
+}
+
+function fmtHealthDate(d) {
+  if (!d) return '';
+  const dt = new Date(d.length <= 10 ? d + 'T00:00:00' : d);
+  return dt.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+}
+
+async function saveHealthEntry() {
+  const weight   = parseFloat(document.getElementById('hWeight').value) || null;
+  const height   = parseFloat(document.getElementById('hHeight').value) || null;
+  const headCirc = parseFloat(document.getElementById('hHead').value) || null;
+  const notes    = document.getElementById('hNotes').value.trim();
+  const type     = document.getElementById('hType').value.trim();
+  if (!weight && !height && !headCirc && !notes) return;
+
+  let bmi = null;
+  if (weight && height) bmi = Math.round(weight / Math.pow(height/100, 2) * 10) / 10;
+
+  const entry = {
+    id: Date.now(),
+    date: document.getElementById('hDate').value || new Date().toISOString().slice(0,10),
+    type: type || 'Misurazione',
+    ageMonths: age.totalMonths,
+    weight, height, headCirc, bmi,
+    percentiles: document.getElementById('hPerc').value.trim(),
+    notes,
+    photo: null
+  };
+
+  await fetch('/api/health', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry)
+  });
+
+  ['hDate','hType','hWeight','hHeight','hHead','hPerc','hNotes'].forEach(i => document.getElementById(i).value = '');
+  await renderHealth();
+}
+
+// ===================== NANNA / RUMORI BIANCHI =====================
+let noiseCtx = null, noiseSrcs = [], noiseGain = null;
+let noiseType = null, noiseVolume = 0.5, noiseTimerId = null;
+const noiseBufferCache = {};
+const NOISE_FILES = {
+  forest: ['sounds/wind-in-trees.mp3', 'sounds/birds.mp3'],
+  rain:   ['sounds/rain-on-leaves.mp3'],
+  waves:  ['sounds/waves.mp3']
+};
+let iosPrimed = false;
+
+// Trucco "unmute" iOS: riproduce un breve loop via <audio> per spostare la
+// sessione audio su "playback", così il Web Audio si sente anche col silenzioso.
+function primeIOSAudio() {
+  if (iosPrimed) return;
+  iosPrimed = true;
+  try {
+    const sr = 8000, n = Math.floor(sr * 0.5);
+    const ab = new ArrayBuffer(44 + n * 2), dv = new DataView(ab);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); dv.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+    dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+    dv.setUint32(24, sr, true); dv.setUint32(28, sr * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
+    w(36, 'data'); dv.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) dv.setInt16(44 + i * 2, (Math.random() * 2 - 1) * 24, true);
+    const tag = document.createElement('audio');
+    tag.loop = true; tag.setAttribute('playsinline', ''); tag.volume = 0.02;
+    tag.src = URL.createObjectURL(new Blob([ab], { type: 'audio/wav' }));
+    tag.play().catch(() => {});
+    window._iosKeepAlive = tag;
+  } catch (e) {}
+}
+
+function makeNoiseBuffer(ctx, type) {
+  const len = ctx.sampleRate * 2;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  if (type === 'white') {
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  } else if (type === 'pink') {
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.99886*b0 + w*0.0555179; b1 = 0.99332*b1 + w*0.0750759;
+      b2 = 0.96900*b2 + w*0.1538520; b3 = 0.86650*b3 + w*0.3104856;
+      b4 = 0.55000*b4 + w*0.5329522; b5 = -0.7616*b5 - w*0.0168980;
+      d[i] = (b0+b1+b2+b3+b4+b5+b6 + w*0.5362) * 0.11;
+      b6 = w * 0.115926;
+    }
+  } else { // brown
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.02 * w) / 1.02;
+      d[i] = last * 3.5;
+    }
+  }
+  return buf;
+}
+
+async function toggleNoise(type) {
+  primeIOSAudio();
+  if (!noiseCtx) noiseCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (noiseCtx.state === 'suspended') noiseCtx.resume();
+
+  if (noiseType === type) { stopNoise(); return; }
+
+  stopSources();
+  noiseType = type;
+  updateNoiseUI();
+
+  noiseGain = noiseCtx.createGain();
+  noiseGain.gain.value = noiseVolume;
+  noiseGain.connect(noiseCtx.destination);
+
+  let buffers;
+  if (NOISE_FILES[type]) {
+    const status = document.getElementById('noiseStatus');
+    if (status) status.textContent = '⏳ Carico il suono...';
+    try {
+      buffers = await Promise.all(NOISE_FILES[type].map(loadAudioFile));
+    } catch (e) {
+      stopSources(); noiseType = null; updateNoiseUI();
+      if (status) status.textContent = '⚠️ Errore nel caricare il suono';
+      return;
+    }
+    if (noiseType !== type) return; // l'utente ha cambiato suono durante il caricamento
+  } else {
+    buffers = [makeNoiseBuffer(noiseCtx, type)];
+  }
+
+  noiseSrcs = buffers.map(buf => {
+    const s = noiseCtx.createBufferSource();
+    s.buffer = buf; s.loop = true;
+    s.connect(noiseGain);
+    s.start();
+    return s;
+  });
+  updateNoiseUI();
+}
+
+async function loadAudioFile(url) {
+  if (noiseBufferCache[url]) return noiseBufferCache[url];
+  const res = await fetch(url);
+  const arr = await res.arrayBuffer();
+  const buf = await noiseCtx.decodeAudioData(arr);
+  noiseBufferCache[url] = buf;
+  return buf;
+}
+
+function stopSources() {
+  noiseSrcs.forEach(s => { try { s.stop(); } catch(e){} try { s.disconnect(); } catch(e){} });
+  noiseSrcs = [];
+  if (noiseGain) { try { noiseGain.disconnect(); } catch(e){} noiseGain = null; }
+}
+
+function stopNoise() {
+  stopSources();
+  noiseType = null;
+  if (noiseTimerId) { clearTimeout(noiseTimerId); noiseTimerId = null; }
+  document.querySelectorAll('#noiseTimer button').forEach(b => b.classList.toggle('active', b.textContent === 'Off'));
+  updateNoiseUI();
+}
+
+function setNoiseVolume(v) {
+  noiseVolume = parseFloat(v);
+  if (noiseGain) noiseGain.gain.value = noiseVolume;
+}
+
+function setNoiseTimer(min, btn) {
+  document.querySelectorAll('#noiseTimer button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (noiseTimerId) { clearTimeout(noiseTimerId); noiseTimerId = null; }
+  if (min > 0) noiseTimerId = setTimeout(() => stopNoise(), min * 60000);
+}
+
+function updateNoiseUI() {
+  const labels = { brown: 'Marrone', forest: 'Foresta', rain: 'Pioggia', waves: 'Onde', pink: 'Rosa', white: 'Bianco' };
+  document.querySelectorAll('.noise-btn').forEach(b =>
+    b.classList.toggle('playing', b.dataset.type === noiseType));
+  const s = document.getElementById('noiseStatus');
+  if (s) s.textContent = noiseType ? '▶ In riproduzione: ' + labels[noiseType] : 'In pausa';
+}
+
+// ===================== START =====================
+startDomObserver();
+init().then(function(){
+  document.title = (CONFIG.name || 'Crescita') + ' — Crescita';
+  replaceNameIn(document.body);
+  maybeShowSetup();
+});
+</script>
+</body>
+</html>
