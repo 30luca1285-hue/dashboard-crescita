@@ -966,8 +966,18 @@ function showSetup(first) {
       '<label style="font-size:12px;font-weight:600;color:#7A7068">Data di nascita</label>' +
       '<input id="bbDate" type="date" value="' + (CONFIG.birthdate || '') + '" style="width:100%;padding:11px;margin:6px 0 20px;border:1px solid #E8E2D9;border-radius:10px;font-size:16px">' +
       '<button onclick="saveSetup()" style="width:100%;padding:13px;border:none;border-radius:10px;background:#2D2A24;color:#fff;font-size:15px;font-weight:600;cursor:pointer">' + (first ? 'Inizia' : 'Salva') + '</button>' +
+      (first ? '' :
+        '<div style="border-top:1px solid #E8E2D9;margin-top:20px;padding-top:16px">' +
+          '<div style="font-size:14px;font-weight:700;margin-bottom:6px">Backup dei dati</div>' +
+          '<p style="color:#7A7068;font-size:12.5px;line-height:1.45;margin-bottom:12px">I dati restano solo su questo telefono. Salva ogni tanto un backup (puoi metterlo su iCloud o Google Drive): se cambi telefono o il browser si svuota, lo ricarichi e ritrovi tutto.</p>' +
+          '<button onclick="exportBackup()" style="width:100%;padding:11px;border:1px solid #2D2A24;border-radius:10px;background:#fff;color:#2D2A24;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px">⬇️ Esporta backup</button>' +
+          '<button onclick="document.getElementById(\'bbImport\').click()" style="width:100%;padding:11px;border:1px solid #E8E2D9;border-radius:10px;background:#fff;color:#2D2A24;font-size:14px;font-weight:600;cursor:pointer">⬆️ Ripristina da backup</button>' +
+          '<input type="file" id="bbImport" accept="application/json,.json" style="display:none" onchange="if(this.files[0])importBackup(this.files[0])">' +
+          '<div id="bbBackupInfo" style="font-size:11.5px;color:#7A7068;margin-top:10px"></div>' +
+        '</div>') +
     '</div>';
   document.body.appendChild(ov);
+  if (!first) { const info = document.getElementById('bbBackupInfo'); if (info) info.textContent = backupInfoText(); }
 }
 function saveSetup() {
   const name = (document.getElementById('bbName').value || '').trim() || 'il bambino';
@@ -976,6 +986,70 @@ function saveSetup() {
   location.reload();
 }
 function maybeShowSetup() { if (!localStorage.getItem('bb_config')) showSetup(true); }
+
+// --- Backup / ripristino (file locale, da salvare es. su iCloud o Drive) ---
+async function idbAllPhotos() {
+  const db = await idb();
+  const keys = await new Promise((res, rej) => { const tx = db.transaction('photos','readonly'); const r = tx.objectStore('photos').getAllKeys(); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); });
+  const photos = {}; for (const k of keys) photos[k] = await idbGet(k); return photos;
+}
+async function buildBackup() {
+  return { app:'crescita', version:1, exportedAt:new Date().toISOString(),
+    config: lsGet('bb_config', null), diary: lsGet('bb_diary', []),
+    milestones: lsGet('bb_milestones', {}), health: lsGet('bb_health', []),
+    photos: await idbAllPhotos() };
+}
+async function exportBackup() {
+  const data = await buildBackup();
+  const blob = new Blob([JSON.stringify(data)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const nm = ((CONFIG.name || 'bimbo').toLowerCase().replace(/[^a-z0-9]/g,'')) || 'bimbo';
+  a.href = url; a.download = 'crescita-' + nm + '-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  lsSet('bb_lastBackup', data.exportedAt);
+  const info = document.getElementById('bbBackupInfo'); if (info) info.textContent = backupInfoText();
+}
+async function applyBackup(data) {
+  if (data.config) lsSet('bb_config', data.config);
+  lsSet('bb_diary', Array.isArray(data.diary) ? data.diary : []);
+  lsSet('bb_milestones', data.milestones || {});
+  lsSet('bb_health', Array.isArray(data.health) ? data.health : []);
+  if (data.photos) for (const k in data.photos) await idbPut(k, data.photos[k]);
+  lsSet('bb_lastBackup', data.exportedAt || new Date().toISOString());
+}
+async function importBackup(file) {
+  let data; try { data = JSON.parse(await file.text()); } catch(e){ alert('File di backup non valido.'); return; }
+  if (!data || data.app !== 'crescita') { if (!confirm('Questo file non sembra un backup di questa app. Ripristinarlo comunque?')) return; }
+  if (!confirm('Ripristinare il backup? I dati ora presenti su questo telefono verranno sostituiti.')) return;
+  await applyBackup(data); alert('Backup ripristinato.'); location.reload();
+}
+function backupInfoText() {
+  const t = lsGet('bb_lastBackup', null);
+  if (!t) return '⚠️ Nessun backup ancora salvato.';
+  return 'Ultimo backup: ' + new Date(t).toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+}
+async function requestPersist() { try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch(e){} }
+function maybeBackupReminder() {
+  const items = lsGet('bb_diary', []).length + lsGet('bb_health', []).length;
+  if (items < 3 || sessionStorage.getItem('bb_remDismissed')) return;
+  const last = lsGet('bb_lastBackup', null);
+  const days = last ? (Date.now() - new Date(last).getTime()) / 86400000 : Infinity;
+  if (days < 14) return;
+  const bar = document.createElement('div');
+  bar.style.cssText = 'background:#FBF0E9;border:1px solid #E8C9B3;color:#8a5a36;border-radius:12px;padding:11px 14px;margin-bottom:14px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between';
+  const span = document.createElement('span'); span.textContent = '🌱 State accumulando ricordi: salvate un backup per non perderli.';
+  const wrap = document.createElement('span'); wrap.style.cssText = 'flex:none;display:flex;gap:6px;align-items:center';
+  const btn = document.createElement('button'); btn.textContent = 'Esporta';
+  btn.style.cssText = 'border:none;background:#8a5a36;color:#fff;border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px;cursor:pointer';
+  btn.onclick = async () => { await exportBackup(); bar.remove(); };
+  const x = document.createElement('button'); x.textContent = '×';
+  x.style.cssText = 'border:none;background:none;color:#8a5a36;font-size:20px;line-height:1;cursor:pointer';
+  x.onclick = () => { sessionStorage.setItem('bb_remDismissed','1'); bar.remove(); };
+  wrap.appendChild(btn); wrap.appendChild(x); bar.appendChild(span); bar.appendChild(wrap);
+  const content = document.querySelector('.content'); if (content) content.insertBefore(bar, content.firstChild);
+}
 
 // ===================== CONFIG =====================
 const RIKY_BIRTHDATE = new Date(CONFIG.birthdate);
@@ -2074,7 +2148,9 @@ startDomObserver();
 init().then(function(){
   document.title = (CONFIG.name || 'Crescita') + ' — Crescita';
   replaceNameIn(document.body);
+  requestPersist();
   maybeShowSetup();
+  maybeBackupReminder();
 });
 </script>
 </body>
